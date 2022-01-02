@@ -8,18 +8,22 @@ using namespace std;
 class Solution {
  public:
   bool isPalindrome(string s) {
-    auto is_alnum = [](const char c) {
-      return isalnum(c);
-    };
-    auto left = find_if(s.begin(), s.end(), is_alnum);
-    auto right = find_if(s.rbegin(), s.rend(), is_alnum);
-    while (s.end() != left and s.rend() != right) {
-      if (tolower(*left) != tolower(*right)) {
-        return false;
-      }
+    static const char *alphabet = "qwertyuiopasdfghjklzxcvbnm1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
+    size_t left = s.find_first_of(alphabet);
+    if (string::npos != left) {
+      size_t right = s.find_last_of(alphabet);
+      while (left < right) {
+        char l = tolower(s[left]);
+        char r = tolower(s[right]);
+        if (tolower(s[left]) != tolower(s[right])) {
+          return false;
+        }
 
-      left = find_if(next(left), s.end(), is_alnum);
-      right = find_if(next(right), s.rend(), is_alnum);
+        left = s.find_first_of(alphabet, left + 1);
+        if (string::npos == left) { break; }
+        right = s.find_last_of(alphabet, right - 1);  // right should never be 0: (0 - 1) is size_t overflow
+        if (string::npos == right) { break; }
+      }
     }
 
     return true;
@@ -31,6 +35,7 @@ void TestIsPalindrome() {
   assert(s.isPalindrome("A man, a plan, a canal: Panama"s));
   assert(not s.isPalindrome("race a car"s));
   assert(s.isPalindrome(" "s));
+  assert(not s.isPalindrome(",,,,,,,,,,,,acva"s));
 }
 
 int main() {
